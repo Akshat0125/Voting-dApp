@@ -48,6 +48,26 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', (accounts) => {
+        // Reloading is the safest way to ensure all state checks (admin, etc) are re-run cleanly
+        window.location.reload();
+      });
+
+      window.ethereum.on('chainChanged', () => {
+        window.location.reload();
+      });
+    }
+
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', () => { });
+        window.ethereum.removeListener('chainChanged', () => { });
+      }
+    };
+  }, []);
+
   // Logic to determine which Main View to render
   const renderContent = () => {
     // 1. Not Connected -> Landing Page

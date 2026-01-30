@@ -70,13 +70,26 @@ const AdminDashboard = ({ contract }) => {
         if (!confirm("Are you sure you want to START this election? Voters will be able to vote.")) return;
         try {
             setLoading(true);
+            console.log(`Starting election ${id}...`);
             const tx = await contract.startElection(id);
+            console.log("Transaction sent:", tx.hash);
             await tx.wait();
+            console.log("Transaction confirmed");
             alert("Election Started!");
             setRefreshTrigger(prev => prev + 1);
         } catch (error) {
-            console.error(error);
-            alert("Error starting election");
+            console.error("Detailed Error starting election:", error);
+
+            let errorMessage = "Error starting election";
+            if (error.reason) {
+                errorMessage += ": " + error.reason;
+            } else if (error.data && error.data.message) {
+                errorMessage += ": " + error.data.message;
+            } else if (error.message) {
+                errorMessage += ": " + error.message;
+            }
+
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
