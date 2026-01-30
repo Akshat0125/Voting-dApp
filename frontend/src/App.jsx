@@ -13,6 +13,8 @@ function App() {
   const [contract, setContract] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const [networkName, setNetworkName] = useState("");
 
