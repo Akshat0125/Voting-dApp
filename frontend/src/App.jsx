@@ -24,7 +24,7 @@ function App() {
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      const { signer, address } = await connectWallet();
+      const { signer, address, provider } = await connectWallet();
       setCurrentAccount(address);
 
       const contractInstance = await getContract(CONTRACT_ADDRESS, signer);
