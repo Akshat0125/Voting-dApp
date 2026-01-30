@@ -11,9 +11,12 @@ contract Voting {
     struct Election {
         uint id;
         string name;
-        uint startTime;
-        uint endTime;
+        uint duration;    // Duration in minutes
+        uint startTime;   // Set when admin clicks "Start"
+        uint endTime;     // Calculated when started
         bool exists;
+        bool isStarted;
+        bool isEnded;
     }
 
     address public admin;
@@ -26,7 +29,9 @@ contract Voting {
     // electionId => voterAddress => hasVoted
     mapping(uint => mapping(address => bool)) public hasVoted;
 
-    event ElectionCreated(uint id, string name, uint startTime, uint endTime);
+    event ElectionCreated(uint id, string name, uint duration);
+    event ElectionStarted(uint id, uint startTime, uint endTime);
+    event ElectionEnded(uint id, uint endTime);
     event VoteCast(uint electionId, uint candidateId, address voter);
 
     modifier onlyAdmin() {
@@ -45,9 +50,12 @@ contract Voting {
         elections[electionId] = Election({
             id: electionId,
             name: _name,
-            startTime: block.timestamp,
-            endTime: block.timestamp + (_durationMinutes * 1 minutes),
-            exists: true
+            duration: _durationMinutes,
+            startTime: 0,
+            endTime: 0,
+            exists: true,
+            isStarted: false,
+            isEnded: false
         });
 
         for (uint i = 0; i < _candidateNames.length; i++) {
@@ -58,13 +66,40 @@ contract Voting {
             }));
         }
 
-        emit ElectionCreated(electionId, _name, block.timestamp, block.timestamp + (_durationMinutes * 1 minutes));
+        emit ElectionCreated(electionId, _name, _durationMinutes);
+    }
+
+    function startElection(uint _electionId) public onlyAdmin {
+        Election storage election = elections[_electionId];
+        require(election.exists, "Election does not exist");
+        require(!election.isStarted, "Election already started");
+        require(!election.isEnded, "Election already ended");
+
+        election.isStarted = true;
+        election.startTime = block.timestamp;
+        election.endTime = block.timestamp + (election.duration * 1 minutes);
+
+        emit ElectionStarted(_electionId, election.startTime, election.endTime);
+    }
+
+    function endElection(uint _electionId) public onlyAdmin {
+        Election storage election = elections[_electionId];
+        require(election.exists, "Election does not exist");
+        require(election.isStarted, "Election hasn't started yet");
+        require(!election.isEnded, "Election already ended");
+
+        election.isEnded = true;
+        election.endTime = block.timestamp; // End strictly now
+
+        emit ElectionEnded(_electionId, block.timestamp);
     }
 
     function vote(uint _electionId, uint _candidateId) public {
-        require(elections[_electionId].exists, "Election does not exist");
-        require(block.timestamp >= elections[_electionId].startTime, "Voting has not started");
-        require(block.timestamp <= elections[_electionId].endTime, "Voting has ended");
+        Election storage election = elections[_electionId];
+        require(election.exists, "Election does not exist");
+        require(election.isStarted, "Election has not started");
+        require(!election.isEnded, "Election has ended");
+        require(block.timestamp <= election.endTime, "Election time expired");
         require(!hasVoted[_electionId][msg.sender], "You have already voted in this election");
         require(_candidateId < candidates[_electionId].length, "Invalid candidate");
 

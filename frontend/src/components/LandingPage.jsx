@@ -17,6 +17,7 @@ const LandingPage = ({ onConnect, isConnected }) => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                    {/* Button Area */}
                     {!isConnected && (
                         <button
                             onClick={onConnect}
@@ -25,12 +26,6 @@ const LandingPage = ({ onConnect, isConnected }) => {
                             Get Started
                         </button>
                     )}
-                    <a
-                        href="#features"
-                        className="px-8 py-4 bg-gray-800 text-white rounded-full font-bold text-lg hover:bg-gray-700 transition border border-gray-700"
-                    >
-                        Learn More
-                    </a>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 text-left">
