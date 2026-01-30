@@ -20,9 +20,9 @@ dist
 .env.production.local
 
 # Hardhat
-cache
-artifacts
-typechain
+backend/cache
+backend/artifacts
+backend/typechain
 
 # Vite
 *.local
