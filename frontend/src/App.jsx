@@ -13,7 +13,8 @@ function App() {
   const [contract, setContract] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [networkName, setNetworkName] = useState("");
 
   // Auto-reconnect if previously connected (optional, but good UX)
   // For now, let's keep it manual as requested by standard flow
@@ -26,6 +27,11 @@ function App() {
 
       const contractInstance = await getContract(CONTRACT_ADDRESS, signer);
       setContract(contractInstance);
+      console.log("Contract initialized:", contractInstance);
+
+      // Get Network Name
+      const network = await provider.getNetwork();
+      setNetworkName(network.name === 'unknown' ? `Chain ID: ${network.chainId}` : network.name);
 
       // Check if admin
       try {
@@ -108,6 +114,7 @@ function App() {
               {currentAccount ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block px-3 py-1 bg-gray-800 rounded-full border border-gray-700 text-sm font-mono text-gray-300">
+                    {networkName && <span className="text-yellow-500 mr-2">● {networkName}</span>}
                     {currentAccount.slice(0, 6)}...{currentAccount.slice(-4)}
                   </div>
                   {isAdmin && (

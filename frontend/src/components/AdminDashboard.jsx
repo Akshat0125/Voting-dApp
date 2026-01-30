@@ -71,6 +71,10 @@ const AdminDashboard = ({ contract }) => {
         try {
             setLoading(true);
             console.log(`Starting election ${id}...`);
+            console.log("Contract instance:", contract);
+            if (!contract.startElection) {
+                throw new Error("startElection function not found on contract object. Check ABI.");
+            }
             const tx = await contract.startElection(id);
             console.log("Transaction sent:", tx.hash);
             await tx.wait();
